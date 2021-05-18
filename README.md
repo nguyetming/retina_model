@@ -3,3 +3,5 @@
 
 ## Examples of retina images 
 ![Example image](./retina_image.png)
+
+## Instruction
