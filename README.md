@@ -54,4 +54,5 @@
    angle_retina = 26.5 #angle made btw the normal vector of retina and the horizontal (deg)
    retina_field = 163 (deg)
    ```
+ * Then hit 'Run file'
    
