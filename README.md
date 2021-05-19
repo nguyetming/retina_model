@@ -16,12 +16,10 @@
       ```   
     * openpyxl  - a Python library to read/write Excel 2010 xlsx/xlsm/xltx/xltm files; 
       ```
-      pip install openpyxl
-      
+      pip install openpyxl      
       ```
    
     * pandas - a software library written for the Python programming language for data manipulation and analysis; 
       ```
       pip install pandas
-      
       ```
