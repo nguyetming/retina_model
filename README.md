@@ -56,3 +56,4 @@
    ```
  * Then hit the 'Run file' button
    
+## Output clarification
