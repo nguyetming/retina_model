@@ -7,22 +7,23 @@
 import matplotlib.pyplot as plt
 
 
-import seaborn as sns
-sns.set()
+#import seaborn as sns
+#sns.set()
 import pandas as pd
 
 import numpy as np
 import skimage
-from skimage.draw import circle, ellipse,line, polygon
+from skimage.draw import circle, ellipse,line, polygon, ellipse_perimeter
 from skimage.util.shape import view_as_windows
 from matplotlib.pyplot import figure
-from celluloid import Camera
+#from celluloid import Camera
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from mpl_toolkits.mplot3d import Axes3D
-from celluloid import Camera
-import scipy.io as sp
+#from celluloid import Camera
 from additional_input import * 
 import matplotlib
+from openpyxl import load_workbook
+
 # In[62]:
 
 #This function is to draw the fish, with x and y of left eye, the body length and the distance between eyes.
@@ -67,49 +68,20 @@ class image_computation:
     
     
     #This function is to draw dots that will be shown to the fish, with angle from the first dot to the fish, the angle of the three dots to the horizontal
-    def draw_fish_dot(self, num_points, angle_to_fish, angle_hor, y_leye, x_leye, minor_p, major_p, dist_btw_eye, h,  dist_to_fish, dist_to_plane, dist_btw_pnt, direction):
+    def draw_fish_dot(self, num_points, angle_to_fish, angle_ver, y_leye, x_leye, minor_p, major_p, dist_btw_eye, h,  dist_to_fish , direction):
         x_center = x_leye + dist_btw_eye/2
         y_center = y_leye
         if direction == 'horizontal':
-            y_dot = y_center + dist_to_fish*np.sin(np.radians(angle_to_fish))
-            x_dot = x_center + dist_to_fish*np.cos(np.radians(angle_to_fish))
+            y_dot = y_center + dist_to_fish*np.cos(np.radians(angle_to_fish))
+            x_dot = x_center + dist_to_fish*np.sin(np.radians(angle_to_fish))
             points = {}
     	
     	
             for i in range(num_points):
     	  
-                rr_p1, cc_p1 = ellipse(y_dot + major_p * np.sin(angle_hor/180*np.pi), x_dot + major_p * np.cos(angle_hor/180*np.pi),minor_p, major_p,  rotation=np.deg2rad(-angle_hor) )
+                rr_p1, cc_p1 = ellipse_perimeter(int(round(y_dot)), int(round(x_dot)), int(round(minor_p)), int(round(major_p)),  orientation=-np.deg2rad(angle_ver - 90) )
                
                 points[i] = rr_p1, cc_p1, np.zeros(len(rr_p1))
-                y_dot = y_dot + dist_btw_pnt*np.sin(np.radians(angle_hor))
-                x_dot = x_dot + dist_btw_pnt*np.cos(np.radians(angle_hor))
-                
-    
-        if direction == 'vertical':
-            #dist_to_fish = distance the dot to the projection image of the fish to the plane.
-            #angle_to_fish is now angle to the projection image of the fish to the vertical plane.
-            y_dot = y_center + dist_to_plane
-            x_dot = x_center + dist_to_fish*np.cos(np.radians(angle_to_fish))
-            z_dot = h + dist_to_fish*np.sin(np.radians(angle_to_fish))
-            points = {}
-            for i in range(num_points):
-              rr_p1, cc_p1 = ellipse(z_dot,x_dot,minor_p, major_p,  rotation=np.deg2rad(-angle_hor))
-              points[i] = y_dot*np.ones(len(rr_p1)), cc_p1, rr_p1
-              z_dot = z_dot + dist_btw_pnt*np.sin(np.radians(angle_hor))
-              x_dot = x_dot + dist_btw_pnt*np.cos(np.radians(angle_hor))
-    
-           
-            
-        if direction == 'spherical':
-            points = {}
-            dot = sphere((h+dist_to_plane, 3*major_p, 3*major_p), major_p, (h + round(dist_to_plane*np.sin(np.radians(angle_to_fish))),
-                                                                            3/2*major_p,
-                                                                            3/2*major_p))
-            points[0] = np.where(dot == 1)[1] + (y_center + dist_to_plane*np.cos(np.radians(angle_to_fish))*np.sin(np.radians(angle_hor)) - 3/2*major_p),\
-                        np.where(dot==1)[2] + (x_center + dist_to_plane*np.cos(np.radians(angle_to_fish))*np.cos(np.radians(angle_hor)) - 3/2*major_p),\
-                        np.where(dot == 1)[0]
-    
-       
             
         return points
     
@@ -136,6 +108,7 @@ class image_computation:
         x = (x_eye - x_p)*eye_rad/PE + x_eye
         y = (y_eye - y_p)*eye_rad/PE + y_eye
         z = (z_eye - z_p)*eye_rad/PE + z_eye
+        
         return x,y,z
     
     
@@ -184,34 +157,35 @@ class image_computation:
                 y_p = points[i][0][j]
                 x_p = points[i][1][j]
                 z_p = points[i][2][j]
-                angle_btw_point_et_retina_right, angle_btw_point_et_retina_left = self.angle_to_retina(x_p, y_p, z_p, x_reye, y_reye, z_reye, x_leye, y_leye, z_leye, vector_retina_right_x,vector_retina_left_x)   
+                angle_btw_point_et_retina_right, angle_btw_point_et_retina_left = self.angle_to_retina(x_p, y_p, z_p, x_reye, y_reye, z_reye, x_leye, y_leye, z_leye, vector_retina_right_x, vector_retina_left_x)   
                 if angle_btw_point_et_retina_right <= np.radians(retina_field/2):
                     
                     x_new,y_new,z_new = self.image_find(x_p, y_p, z_p, x_reye, y_reye, z_reye, eye_rad)
                     x_new_right[i].append(x_new)
                     y_new_right[i].append(y_new)
                     z_new_right[i].append(z_new)
-                else: 
-                    print("toofar")
+                # else: 
+                #     print("right toofar")
                 if angle_btw_point_et_retina_left <= np.radians(retina_field/2):
                    
                     x_new,y_new,z_new = self.image_find(x_p, y_p, z_p, x_leye, y_leye, z_leye, eye_rad)
                     x_new_left[i].append(x_new)
                     y_new_left[i].append(y_new)
                     z_new_left[i].append(z_new)
-    
-        return x_new_right, y_new_right,z_new_right, x_new_left, y_new_left,z_new_left
+                # else: 
+                #     print("left toofar")
+        return x_new_right, y_new_right, z_new_right, x_new_left, y_new_left,z_new_left
     
     #Draw expected dot's image on the retina of the fish
-    def draw_dot_onretina(self, num_points, angle_hor, radi_dot, x_dot, y_dot, dist_btw_pnt):
+    def draw_dot_onretina(self, num_points, angle_ver, radi_dot, x_dot, y_dot, dist_btw_pnt):
         img = np.zeros((400, 400), dtype=np.uint8)
         points = {} 
         for i in range(num_points):
           rr_p1, cc_p1 = circle(x_dot + 200, y_dot + 200,radi_dot)
           img[rr_p1, cc_p1] = 3+i
           points[i] = rr_p1 - 200, cc_p1 - 200
-          y_dot = y_dot + dist_btw_pnt*np.sin(np.radians(angle_hor))
-          x_dot = x_dot + dist_btw_pnt*np.cos(np.radians(angle_hor))
+          y_dot = y_dot + dist_btw_pnt*np.sin(np.radians(angle_ver))
+          x_dot = x_dot + dist_btw_pnt*np.cos(np.radians(angle_ver))
         #plt.imshow(img,origin='lower')
           
         return img, points
@@ -255,6 +229,8 @@ class image_computation:
     def compute_position_to_center(self,  x_list, y_list, z_list, eye_list):
         [x_center_retina_right, y_center_retina_right, _, _, _, _,_, _, h] = eye_list
         distance = 0
+        altitude = 0
+        azimuth = 0
         if x_list != []:
             
             x_med = np.median(x_list)
@@ -265,96 +241,17 @@ class image_computation:
             vector_image_center = np.array([x_med -  x_center_retina_right, y_med -  y_center_retina_right, 0])
             vector_eye_center = np.array([x_reye -  x_center_retina_right, y_reye -  y_center_retina_right, 0])
             inner_prod = vector_image_center.dot(vector_eye_center)
-            print(inner_prod)
+            #print(inner_prod)
             azimuth = np.arccos(inner_prod/ (np.linalg.norm(vector_image_center) * np.linalg.norm(vector_eye_center))) / np.pi * 180
-            print('alzimuth:', azimuth)
+            #print('alzimuth:', azimuth)
         return distance, altitude, azimuth
     
-    #Create a wiring eye:
-        
     
-    
-    def wiring_eye(self, x_new_reye, y_new_reye, z_new_reye, x_new_leye, y_new_leye, z_new_leye, eye_rad, retina_field):
-        u, v = np.mgrid[np.radians(retina_field/2):np.radians(360 - retina_field/2):1000j, 0:np.pi:1000j]
-        ul, vl = np.mgrid[np.radians(retina_field/2):np.radians(360 - retina_field/2):1000j, 0:np.pi:1000j]
-        x = x_new_reye + eye_rad*np.cos(u)*np.sin(v)
-        y = y_new_reye + eye_rad*np.sin(u)*np.sin(v)
-        z = z_new_reye + eye_rad*np.cos(v)
-        xl = x_new_leye + eye_rad*np.cos(ul)*np.sin(vl)
-        yl= y_new_leye + eye_rad*np.sin(ul)*np.sin(vl)
-        zl = z_new_leye + eye_rad*np.cos(vl)
-        right_eye_wire = [x,y,z]
-        left_eye_wire = [xl,yl,zl]
-        return right_eye_wire, left_eye_wire
-    
-    
-    # Plot the image on the eye
-    def plot_eye_with_image(self, camera, axes, x_list, y_list, z_list, points, num_points, eye_list):
-        [x_center_retina_right, y_center_retina_right, right_eye_wire, left_eye_wire, x_leye, y_leye, x_reye, y_reye, h] = eye_list
-        [x_right, x_left] = x_list
-        [y_right, y_left] = y_list
-        [z_right, z_left] = z_list
-        [x,y,z] = right_eye_wire
-        [xl, yl, zl] = left_eye_wire
-        
-        [ax0, ax1] = axes #, ax2, ax3] = axes
-        colors = ['b', 'r','g','purple']
-        for j in range(num_points):
-            ax1.scatter(x_right[j], y_right[j], z_right[j], marker='o', color = colors[j])
-            ax1.scatter(x_center_retina_right, y_center_retina_right, h, marker='o', s = 200, color = 'red')
-            #ax2.scatter(x_left[j], y_left[j], z_left[j], marker='o', color = 'b')
-            #ax2.scatter(0,0,0, marker='o', s = 200, color = 'red')
-            
-            #ax0.set_xlabel('Left ------> Right')
-            #ax0.set_ylabel('Back ------> Front')
-            #ax0.imshow(img, origin = "lower",extent=[-img.shape[1]/2, img.shape[1]/2, -img.shape[1]/2, img.shape[1]/2])
-            ax0.scatter(points[j][1], points[j][0], s = 10, marker='o', color = colors[j])
-        ax1.plot_wireframe(x, y, z, color="lightblue")
-        #ax1.plot_wireframe(xl, yl, zl, color="lightblue")
-        #ax0.scatter(points[0][1], points[0][0], points[0][2], s = 10, marker='o', color = 'b')
-        ax0.scatter(x_leye, y_leye, marker='o', s = 60, color = 'r')
-        ax0.scatter(x_reye, y_reye, marker='o', s= 60, color = 'r')
-        ax0.set_aspect('equal')
-        x = [x_reye, x_leye,(x_reye + x_leye)/2 , (x_reye + x_leye)/2]
-        y = [y_reye, y_leye, y_reye , y_reye - 200]
-        z = [h, h, h - 10, h]
-    
-        vertices = [[0, 1, 2], [0, 1, 3], [0, 2, 3], [1, 2, 3]]
-    
-        tupleList = list(zip(x, y, z))
-    
-        poly3d = [[tupleList[vertices[ix][iy]] for iy in range(len(vertices[0]))] for ix in range(len(vertices))]
-        #ax0.add_collection3d(Poly3DCollection(poly3d, facecolors='b', linewidths=1, alpha=0.5))
-    
-        camera.snap()
-        return camera
     
     #Plot the change of area with the change in value of the variable we choose.
-    def plot_area_aspect_ratio(self, area, ratio, distance, list_of_value):
-      
-        fig, axs = plt.subplots(3,1)
-        axs[0].plot(list_of_value, area, 'go--', linewidth = 2, markersize = 12)
-        
     
-        axs[0].set_xlabel('Angle from fish', fontsize= 14 )
-        axs[0].set_ylabel('Area of the image \n on the retina (in pixel)', fontsize=13)
-        axs[0].tick_params(axis='x', labelsize= 13)
-        axs[0].tick_params(axis='y', labelsize= 13)
-        
-        axs[1].plot(list_of_value, ratio, 'bo--', linewidth = 2, markersize = 12)
-        axs[1].set_xlabel('Angle from fish', fontsize=14)
-        axs[1].set_ylabel('Aspect ratio of the image \n on the retina', fontsize=13)
-        axs[1].tick_params(axis='x', labelsize= 13)
-        axs[1].tick_params(axis='y', labelsize= 13)
-        
-        axs[2].plot(list_of_value, distance, 'ro--', linewidth = 2, markersize = 12)
-        axs[2].set_xlabel('Angle from fish', fontsize=14)
-        axs[2].set_ylabel('Distance of the image \n to the retina center', fontsize=13)
-        axs[2].tick_params(axis='x', labelsize= 13)
-        axs[2].tick_params(axis='y', labelsize= 13)
-        plt.show()
     
-    def save_eye_properties(self, labels, dist_to_border, angle_hor, angle_to_fish, minor_p, major_p, filename):
+    def save_eye_properties(self, labels, dist_to_border, angle_ver, angle_to_fish, minor_p, major_p, filename):
 
         semi_major_list = []
         semi_minor_list = []
@@ -374,23 +271,34 @@ class image_computation:
         
         
         x_center_retina_right = x_reye - eye_rad*np.cos(np.radians(26.5))
-        y_center_retina_right = y_reye + eye_rad*np.sin(np.radians(26.5))
+        y_center_retina_right = y_reye - eye_rad*np.sin(np.radians(26.5))
+        print("y center retina 1:", y_center_retina_right * arena_radius)
         x_center_retina_left = x_leye + eye_rad*np.cos(np.radians(26.5))
         y_center_retina_left = y_center_retina_right
         
         color = ['r', 'g', 'b']
-        
+        x_image_right = []
+        y_image_right = []
+        z_image_right = []
+        x_image_left = []
+        y_image_left = []
+        z_image_left = []
+        x_point = []
+        y_point = []
+        z_point = []
         for angle_fish in angle_to_fish:
             for dist in dist_to_border:
-                for i in range(len(angle_hor)):
-                    #print("parameters:",num_points, angle_to_fish, angle_hor[i], y_leye, x_leye, minor_p, major_p, dist_btw_eye, h,  dist, dist_to_plane, dist_btw_pnt, direction)
-                    points =  self.draw_fish_dot(1, angle_fish, angle_hor[i], y_leye, x_leye, minor_p, major_p, dist_btw_eye, h,  dist, dist_to_plane, dist_btw_pnt, direction)
+                for i in range(len(angle_ver)):
+                    #print("parameters:",num_points, angle_to_fish, angle_ver[i], y_leye, x_leye, minor_p, major_p, dist_btw_eye, h,  dist, dist_to_plane, dist_btw_pnt, direction)
+                    points =  self.draw_fish_dot(1, angle_fish, angle_ver[i], y_leye, x_leye, minor_p, major_p, dist_btw_eye, h,  dist, direction)
+                    
                     #ax0.scatter(points[0][1], points[0][0], s = 10, marker='o', color = 'purple')
                     
                     #find coordinate of the dots' images on the retina:
-                    x_new_right, y_new_right,z_new_right, x_new_left, y_new_left,z_new_left  = self.find_new_coordinate_list(points,num_points, list_of_input, eye_rad)
-                    area, ratio, semi_major, semi_minor =   self.compute_area_and_aspect_ratio(x_new_right[0], y_new_right[0], z_new_right[0], eye_rad)  
-                    distance_to_center, altitude, azimuth  = self.compute_position_to_center(x_new_right[0], y_new_right[0], z_new_right[0], eye_list)
+                    x_new_right, y_new_right, z_new_right, x_new_left, y_new_left,z_new_left  = self.find_new_coordinate_list(points, num_points, list_of_input, eye_rad)
+                    area, ratio, semi_major, semi_minor =   self.compute_area_and_aspect_ratio(x_new_left[0], y_new_left[0], z_new_left[0], eye_rad)  
+                    distance_to_center, altitude, azimuth  = self.compute_position_to_center(x_new_left[0], y_new_left[0], z_new_left[0], eye_list)
+                    
                     distance_right.append(distance_to_center)
                     altitude_list.append(altitude)
                     azimuth_list.append(azimuth)
@@ -402,37 +310,110 @@ class image_computation:
                     x_list = [ x_new_right, x_new_left]
                     y_list = [ y_new_right, y_new_left]
                     z_list = [ z_new_right, z_new_left]
-                
-                
+                    
+                    x_image_right.append(x_new_right[0])
+                    y_image_right.append(y_new_right[0])
+                    z_image_right.append(z_new_right[0])
+                    x_image_left.append(x_new_left[0])
+                    y_image_left.append(y_new_left[0])
+                    z_image_left.append(z_new_left[0])
+                    
+                    x_point.append(list(points[0][1]))
+                    y_point.append(list(points[0][0]))
+                    z_point.append(list(points[0][2]))
         
-        #animation = camera.animate(interval=300)
-        #plt.show()
-            #animation.save('movedotsaway.mp4')
-            #plot area and aspect ratio of the images with different distances. 
-        ang = [15,30,45,60,90,120]
-        fig, axs = plt.subplots(3,1)
-        
-        
-        cmap = matplotlib.cm.get_cmap('magma')
-        
-        rgba = cmap(0.5)
-        
-        fig.canvas.draw()
+                    
         
         
         
         
+       
+        tmp_left = []
+        df_left = pd.DataFrame.empty
+        df2_left = pd.DataFrame.empty
+        df3_left = pd.DataFrame.empty
         
+        tmp_right = []
+        df_right = pd.DataFrame.empty
+        df2_right = pd.DataFrame.empty
+        df3_right = pd.DataFrame.empty
+        import csv
+        from openpyxl import load_workbook
+
+        if x_image_left[0] != []:
+            
+            tmp_left = list(zip(x_point[0], y_point[0], z_point[0],  x_image_left[0], y_image_left[0], z_image_left[0]))
+          
+            df_left = pd.DataFrame(tmp_left)
+            df_left = df_left * arena_radius
+            
+            df2_left = pd.DataFrame(list(zip(semi_major_list, semi_minor_list,
+                                         area_list, ratio_list, distance_right, azimuth_list, altitude_list)))
+            df2_left.iloc[:,[0,1,2,4]] = df2_left.iloc[:,[0,1,2,4]] * arena_radius
+            df3_left = pd.DataFrame(np.array([[major_p/minor_p, minor_p * arena_radius, major_p * arena_radius, dist * arena_radius, angle_to_fish[0], angle_ver[0]
+                                  , x_leye * arena_radius, y_leye* arena_radius, z_leye* arena_radius, x_center_retina_left * arena_radius,
+                                  y_center_retina_left * arena_radius, eye_rad* arena_radius]]))
+            
+            df_left.to_excel(filename + "_" + labels + "_LeftData.xlsx", index = False, header = ['x_point',
+                                                        'y_point',
+                                                        'z_point',
+                                                        'x_image_left',
+                                                        'y_image_left',
+                                                        'z_image_left'])
+            df2_left.to_excel(filename + "_" + labels + "_LeftProperties.xlsx", index = False, header = [
+                                                        'Semi major',
+                                                        'Semi minor',
+                                                        'Image_area',
+                                                        'Aspect ratio',
+                                                        'Distance to retina center',
+                                                        'Azimuth',
+                                                        'Altitude'])
+            
+            
+            
+            df3_left.to_excel(filename + "_"+ labels + "_LeftParameters.xlsx",  index = False,
+                                         header = ['ratio', 'minor_p', 'major_p', 'dist_to_center', 'angle_to_fish', 'angle_ver',
+                                                   'x_eye_ball_left', 'y_eye_ball_left', 'z_eye_ball_left', 'x_center_retina_left', 'y_center_retina_left', 'eye_rad'])
+            
+            
         
-        df = pd.DataFrame(list(zip(labels,semi_major_list, semi_minor_list, area_list, ratio_list, distance_right, azimuth_list, altitude_list )), columns =['Visual_angle_and_orientation',
-                                                                                             'Semi major',
-                                                                                             'Semi minor',
-                                                                                             'Image_area',
-                                                                                             'Aspect ratio',
-                                                                                             'Distance to retina center',
-                                                                                             'Azimuth',
-                                                                                             'Altitude'])
-         
-        df.to_csv (filename, index = False, header=True)
+        if x_image_right[0] != []:
+            tmp_right = list(zip(x_point[0], y_point[0], z_point[0],  x_image_right[0], y_image_right[0], z_image_right[0]))
+            print('tmp right= ', tmp_right)
+            df_right = pd.DataFrame(tmp_right)
+            df_right = df_right * arena_radius
+            #print(df_right)
+            df2_right = pd.DataFrame(list(zip(semi_major_list, semi_minor_list,
+                                          area_list, ratio_list, distance_right, azimuth_list, altitude_list)))
+            df2_right.iloc[:,[0,1,2,4]] = df2_right.iloc[:,[0,1,2,4]] * arena_radius
+        #df.to_csv (filename, index = False, header=True, sep = '\t', quoting=csv.QUOTE_NONE)
+            
+           
+            df_right.to_excel(filename + "_" + labels + "_RightData.xlsx", index = False, header = ['x_point',
+                                                        'y_point',
+                                                        'z_point',
+                                                        'x_image_right',
+                                                        'y_image_right',
+                                                       'z_image_right'])
+            df2_right.to_excel(filename + "_" + labels + "_RightProperties.xlsx", index = False, header = [
+                                                        'Semi major',
+                                                        'Semi minor',
+                                                        'Image_area',
+                                                        'Aspect ratio',
+                                                        'Distance to retina center',
+                                                        'Azimuth',
+                                                        'Altitude'])
         
+            df3_right = pd.DataFrame(np.array([[major_p/minor_p, minor_p * arena_radius, major_p * arena_radius, dist * arena_radius, angle_to_fish[0], angle_ver[0]
+                                  , x_reye * arena_radius, y_reye* arena_radius, z_reye* arena_radius, 
+                                  x_center_retina_right * arena_radius,
+                                  y_center_retina_right * arena_radius, eye_rad* arena_radius]]))
+   
+            
+            
+        
+            df3_right.to_excel(filename + "_"+ labels + "_RightParameters.xlsx",  index = False,
+                                         header = ['ratio', 'minor_p', 'major_p', 'dist_to_center', 'angle_to_fish', 'angle_ver',
+                                                   'x_eye_ball_right', 'y_eye_ball_right', 'z_eye_ball_right', 'x_center_retina_right', 'y_center_retina_right', 'eye_rad'])
+    
         return 

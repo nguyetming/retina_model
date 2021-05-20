@@ -1,19 +1,21 @@
 from Eye_model_function_curve import *
 from additional_input import *
-from celluloid import Camera
 import scipy.io as sp
-#Input the data here:
-#angle_to_fish = [0,30.,45.,60., 90., 120.,135.,150.]
-#angle_hor = [0,30.,45.,60., 90., 120.,135.,150.]
+from numpy import genfromtxt
 
-angle_to_fish = [60] #angle between Ox and the line connecting the closet point of the ellipse to the fish
-dist_to_border =  [1.54/arena_radius, 0.84/arena_radius, 0.42/arena_radius]  # --> dist to border #distance_xy_right / arena_radius - sizes
-angle_hor = [-45,0,45,90]  # angle to horizontal of the ellipse (measured by the vertical axis, i.e. major axis, main axis )
+#========= INPUT ==============
 
-eye = image_computation()
-ratio = 6 
-minor_p = 0.065/arena_radius #minor axis of the dot
-major_p = 0.065* ratio/arena_radius #major axis of the dot
+
+ratio = 1### how big is one axis compared to the other.
+minor_p = 0.075  #minor axis of the dot   (cm)
+major_p = minor_p * ratio #major axis of the dot  (cm)
+dist_to_center =  [0.9]   # distance from the fish's head to the center of the stimulus (cm) 
+angle_to_fish = [-50] #angle between Oy and the line connecting the closet point of the ellipse to the fish
+## start from Ox and go to the 
+angle_ver = [40]  # angle from Oy to the horizontal of the ellipse (measured by the vertical axis, i.e. major axis, main axis )  
+location = r'/Users/nguyetnguyen/Downloads/Retina model/Retina model/model_code/image'
+labels = "constant_ver_1" ##labels of stimulus. Eg: vertical ellipse or horizontal ellipse
+#==============================
 
 
 # =============================================================================
@@ -28,11 +30,10 @@ major_p = 0.065* ratio/arena_radius #major axis of the dot
 # 
 # =============================================================================
 
-location = r'/Users/nguyetnguyen/Documents/RH/eye model/image_data.csv'
-labels = ["5135", "590", "545", "50", "10135","1090","1045","100", "45135","4590", "4545", "450"]
-eye.save_eye_properties(labels, dist_to_border, angle_hor, angle_to_fish, minor_p, major_p, location)
-
-
-
+normalize_list2 = [minor_p, major_p]
+minor_p, major_p = [x/arena_radius for x in normalize_list2]
+dist_to_center = [y/arena_radius for y in dist_to_center]
+eye = image_computation()
+eye.save_eye_properties(labels, dist_to_center, angle_ver, angle_to_fish, minor_p, major_p, location) #### real computation happens here.
 
 
