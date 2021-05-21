@@ -56,7 +56,8 @@
    ```
  * Then hit the 'Run file' button
    
-## Output clarification
+## Output clarification 
+* All the output files are saved as excel file (.xlsx)
 * Example of output parameters:
    * 'ratio': aspect ratio of the visual stimulus
    * 'minor_p': the length (cm) of the visual stimulus' minor axis 
