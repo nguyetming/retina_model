@@ -67,7 +67,7 @@
    * 'x_eye_ball_left', 'y_eye_ball_left', 'z_eye_ball_left': are coordinates (cm) of the left/ right eye ball's center 
    * 'x_center_retina_left', 'y_center_retina_left' : are coordinates (cm) of the left/right retina center
    * 'eye_rad': eye ball's radius (cm) 
-   * ![Output image](./output_data.png)
+   * ![Output image](./output_parameters.png)
 * Example of output data:
    * 'x_point', 'y_point', 'z_point' are coordinates of points on the contour of the visual stimuli
    * 'x_image_right', 'y_image_right', 'z_image_right' are coordinates of points on the contour of the stimuli's retina images on the right retina
@@ -82,3 +82,4 @@
    * 'Distance to retina center': the distance(cm) from the retina center to the stimulus's retina image
    * 'Azimuth': the azimuth angle position of the stimulus's retina image
    * 'Altitude': the altitude angle position of the stimulus's retina image
+   * ![Output image](./output_properties.png)
