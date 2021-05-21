@@ -57,3 +57,28 @@
  * Then hit the 'Run file' button
    
 ## Output clarification
+* Example of output parameters:
+   * 'ratio': aspect ratio of the visual stimulus
+   * 'minor_p': the length (cm) of the visual stimulus' minor axis 
+   * 'major_p': the length (cm) of the visual stimulus' major axis 
+   * 'dist_to_center': the distance (cm) from the center of the visual stimulus to the midpoint of the line segment connecting two eye balls' centers
+   * 'angle_to_fish': angle (deg) from the vertical axis (Oy) to the line segment connecting the fish to the visual stimulus's center (clockwise)
+   * 'angle_ver' : angle (deg) from the vertical axis (Oy) to the major axis of the visual stimulus (clockwise)
+   * 'x_eye_ball_left', 'y_eye_ball_left', 'z_eye_ball_left': are coordinates (cm) of the left/ right eye ball's center 
+   * 'x_center_retina_left', 'y_center_retina_left' : are coordinates (cm) of the left/right retina center
+   * 'eye_rad': eye ball's radius (cm) 
+   * ![Output image](./output_data.png)
+* Example of output data:
+   * 'x_point', 'y_point', 'z_point' are coordinates of points on the contour of the visual stimuli
+   * 'x_image_right', 'y_image_right', 'z_image_right' are coordinates of points on the contour of the stimuli's retina images on the right retina
+   * 'x_image_left', 'y_image_left', 'z_image_left' are coordinates of points on the contour of the stimuli's retina images on the left retina
+   * ![Output image](./output_data.png)
+
+* Example of output properties: 
+   * 'Semi major': the length (cm) of major axis of a stimulus's retina image
+   * 'Semi minor': the length (cm) of major axis of a stimulus's retina image
+   * 'Image_area': the area (cm2) of the stimulus's retina image 
+   * 'Aspect ratio': the aspect ratio of the stimulus's retina image
+   * 'Distance to retina center': the distance(cm) from the retina center to the stimulus's retina image
+   * 'Azimuth': the azimuth angle position of the stimulus's retina image
+   * 'Altitude': the altitude angle position of the stimulus's retina image
